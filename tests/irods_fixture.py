@@ -3,14 +3,22 @@ from pathlib import PurePath
 
 import pytest
 
-from workbot.irods import AVU, BatonClient, Collection, have_admin, imkdir, \
-    iput, irm, \
-    mkgroup, rmgroup
+from workbot.irods import (
+    AVU,
+    BatonClient,
+    Collection,
+    have_admin,
+    imkdir,
+    iput,
+    irm,
+    mkgroup,
+    rmgroup,
+)
 from workbot.metadata import ONTMetadata
 
-tests_have_admin = pytest.mark.skipif(not have_admin(),
-                                      reason="tests do not have iRODS "
-                                             "admin access")
+tests_have_admin = pytest.mark.skipif(
+    not have_admin(), reason="tests do not have iRODS " "admin access"
+)
 
 TEST_GROUPS = ["ss_study_01", "ss_study_02", "ss_study_03"]
 
@@ -56,28 +64,39 @@ def irods_synthetic(tmp_path, baton_session):
     iput("./tests/data/synthetic", rods_path, recurse=True)
     expt_root = PurePath(rods_path, "synthetic")
 
-    avus = [avu.with_namespace(ONTMetadata.namespace) for avu in
-            [AVU(ONTMetadata.EXPERIMENT_NAME.value,
-                 "simple_experiment_001"),
-             AVU(ONTMetadata.INSTRUMENT_SLOT.value,
-                 "1")]]
+    avus = [
+        avu.with_namespace(ONTMetadata.namespace)
+        for avu in [
+            AVU(ONTMetadata.EXPERIMENT_NAME.value, "simple_experiment_001"),
+            AVU(ONTMetadata.INSTRUMENT_SLOT.value, "1"),
+        ]
+    ]
 
-    Collection(baton_session,
-               PurePath(expt_root,
-                        "simple_experiment_001",
-                        "20190904_1514_GA10000_flowcell011_69126024")). \
-        meta_add(*avus)
+    Collection(
+        baton_session,
+        PurePath(
+            expt_root,
+            "simple_experiment_001",
+            "20190904_1514_GA10000_flowcell011_69126024",
+        ),
+    ).meta_add(*avus)
 
-    avus = [avu.with_namespace(ONTMetadata.namespace) for avu in
-            [AVU(ONTMetadata.EXPERIMENT_NAME.value,
-                 "multiplexed_experiment_001"),
-             AVU(ONTMetadata.INSTRUMENT_SLOT.value,
-                 "1")]]
+    avus = [
+        avu.with_namespace(ONTMetadata.namespace)
+        for avu in [
+            AVU(ONTMetadata.EXPERIMENT_NAME.value, "multiplexed_experiment_001"),
+            AVU(ONTMetadata.INSTRUMENT_SLOT.value, "1"),
+        ]
+    ]
 
-    Collection(baton_session,
-               PurePath(expt_root, "multiplexed_experiment_001",
-                        "20190904_1514_GA10000_flowcell101_cf751ba1")). \
-        meta_add(*avus)
+    Collection(
+        baton_session,
+        PurePath(
+            expt_root,
+            "multiplexed_experiment_001",
+            "20190904_1514_GA10000_flowcell101_cf751ba1",
+        ),
+    ).meta_add(*avus)
 
     try:
         add_test_groups()

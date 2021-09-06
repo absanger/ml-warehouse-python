@@ -73,9 +73,9 @@ class BatonError(Exception):
 @unique
 class Permission(Enum):
     NULL = "null"
-    OWN = "own",
-    READ = "read",
-    WRITE = "write",
+    OWN = ("own",)
+    READ = ("read",)
+    WRITE = ("write",)
 
 
 @total_ordering
@@ -89,14 +89,17 @@ class AC(object):
             raise ValueError("user may not be None")
 
         if user.find(AC.SEPARATOR) >= 0:
-            raise ValueError("User '{}' should not contain a zone suffix. "
-                             "Please use the zone= keyword argument to set "
-                             "a zone".format(user))
+            raise ValueError(
+                "User '{}' should not contain a zone suffix. "
+                "Please use the zone= keyword argument to set "
+                "a zone".format(user)
+            )
 
         if zone:
             if zone.find(AC.SEPARATOR) >= 0:
-                raise ValueError("Zone '{}' "
-                                 "contained '{}'".format(zone, AC.SEPARATOR))
+                raise ValueError(
+                    "Zone '{}' " "contained '{}'".format(zone, AC.SEPARATOR)
+                )
         self.user = user
         self.zone = zone
         self.perm = perm
@@ -105,10 +108,12 @@ class AC(object):
         return hash(self.user) + hash(self.zone) + hash(self.perm)
 
     def __eq__(self, other):
-        return isinstance(other, AC) and \
-               self.user == other.user and \
-               self.zone == other.zone and \
-               self.perm == other.perm
+        return (
+            isinstance(other, AC)
+            and self.user == other.user
+            and self.zone == other.zone
+            and self.perm == other.perm
+        )
 
     def __lt__(self, other):
         if self.zone is not None and other.zone is None:
@@ -153,9 +158,10 @@ class AVU(object):
     def __init__(self, attribute: str, value: Any, units=None, namespace=None):
         if namespace:
             if namespace.find(AVU.SEPARATOR) >= 0:
-                raise ValueError("AVU namespace '{}' "
-                                 "contained '{}'".format(namespace,
-                                                         AVU.SEPARATOR))
+                raise ValueError(
+                    "AVU namespace '{}' "
+                    "contained '{}'".format(namespace, AVU.SEPARATOR)
+                )
         if attribute is None:
             raise ValueError("AVU attribute may not be None")
         if value is None:
@@ -167,7 +173,7 @@ class AVU(object):
         self._units = units
 
     @classmethod
-    def collate(cls, *avus) -> Dict[str: List[AVU]]:
+    def collate(cls, *avus) -> Dict[str : List[AVU]]:
         """Collates AVUs by attribute (including namespace, if any) and
         returns a dict mapping the attribute to a list of AVUs with that
         attribute.
@@ -210,25 +216,29 @@ class AVU(object):
         values = set()
         for avu in avus:
             if avu.is_history():
-                raise ValueError("Cannot create a history of "
-                                 "a history AVU: {}".format(avu))
+                raise ValueError(
+                    "Cannot create a history of " "a history AVU: {}".format(avu)
+                )
             namespaces.add(avu.namespace)
             attributes.add(avu.without_namespace)
             values.add(avu.value)
 
         if len(namespaces) > 1:
-            raise ValueError("Cannot create a history for AVUs with a "
-                             "mixture of namespaces: {}".format(namespaces))
+            raise ValueError(
+                "Cannot create a history for AVUs with a "
+                "mixture of namespaces: {}".format(namespaces)
+            )
         if len(attributes) > 1:
-            raise ValueError("Cannot create a history for AVUs with a "
-                             "mixture of attributes: {}".format(attributes))
+            raise ValueError(
+                "Cannot create a history for AVUs with a "
+                "mixture of attributes: {}".format(attributes)
+            )
 
         history_namespace = namespaces.pop()
         history_attribute = attributes.pop() + AVU.HISTORY_SUFFIX
         history_value = "[{}] {}".format(date, ",".join(sorted(list(values))))
 
-        return AVU(history_attribute, history_value,
-                   namespace=history_namespace)
+        return AVU(history_attribute, history_value, namespace=history_namespace)
 
     @property
     def namespace(self):
@@ -243,8 +253,7 @@ class AVU(object):
     @property
     def attribute(self):
         if self._namespace:
-            return "{}{}{}".format(self._namespace, AVU.SEPARATOR,
-                                   self._attribute)
+            return "{}{}{}".format(self._namespace, AVU.SEPARATOR, self._attribute)
         else:
             return self.without_namespace
 
@@ -257,10 +266,7 @@ class AVU(object):
         return self._units
 
     def with_namespace(self, namespace: str):
-        return AVU(self._attribute,
-                   self._value,
-                   self._units,
-                   namespace=namespace)
+        return AVU(self._attribute, self._value, self._units, namespace=namespace)
 
     def is_history(self) -> bool:
         """Return true if this is a history AVU."""
@@ -273,9 +279,11 @@ class AVU(object):
         if not isinstance(other, AVU):
             return False
 
-        return self.attribute == other.attribute and \
-            self.value == other.value and \
-            self.units == other.units
+        return (
+            self.attribute == other.attribute
+            and self.value == other.value
+            and self.units == other.units
+        )
 
     def __lt__(self, other):
         if self.namespace is not None and other.namespace is None:
@@ -318,11 +326,11 @@ class AVU(object):
 
 class BatonJSONEncoder(json.JSONEncoder):
     """Encoder for baton JSON."""
+
     def default(self, o: Any) -> Any:
 
         if isinstance(o, AVU):
-            enc = {BatonClient.ATTRIBUTE: o.attribute,
-                   BatonClient.VALUE: o.value}
+            enc = {BatonClient.ATTRIBUTE: o.attribute, BatonClient.VALUE: o.value}
             if o.units:
                 enc[BatonClient.UNITS] = o.units
             return enc
@@ -331,9 +339,11 @@ class BatonJSONEncoder(json.JSONEncoder):
             return o.name.lower()
 
         if isinstance(o, AC):
-            return {BatonClient.OWNER: o.user,
-                    BatonClient.ZONE: o.zone,
-                    BatonClient.LEVEL: o.perm}
+            return {
+                BatonClient.OWNER: o.user,
+                BatonClient.ZONE: o.zone,
+                BatonClient.LEVEL: o.perm,
+            }
 
         if isinstance(o, PurePath):
             return o.as_posix()
@@ -374,7 +384,7 @@ def as_baton(d: Dict) -> Any:
 
 class BatonClient(object):
     """A wrapper around the baton client program, used for interacting with
-     iRODS."""
+    iRODS."""
 
     AVUS = "avus"
     ATTRIBUTE = "attribute"
@@ -422,13 +432,14 @@ class BatonClient(object):
             log.warning("Tried to start a BatonClient that is already running")
             return
 
-        self.proc = subprocess.Popen(['baton-do', '--unbuffered'],
-                                     bufsize=0,
-                                     stdin=subprocess.PIPE,
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE)
-        log.debug("Started a new baton-do process "
-                  "with PID {}".format(self.proc.pid))
+        self.proc = subprocess.Popen(
+            ["baton-do", "--unbuffered"],
+            bufsize=0,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        log.debug("Started a new baton-do process " "with PID {}".format(self.proc.pid))
 
     def stop(self):
         """Stops the client if it is running."""
@@ -442,18 +453,32 @@ class BatonClient(object):
             self.proc.terminate()
             self.proc.wait(timeout=10)
         except subprocess.TimeoutExpired:
-            log.error("Failed to terminate baton-do PID {}; "
-                      "killing".format(self.proc.pid))
+            log.error(
+                "Failed to terminate baton-do PID {}; " "killing".format(self.proc.pid)
+            )
             self.proc.kill()
         self.proc = None
 
-    def list(self, item: Dict, acl=False, avu=False, contents=False,
-             recurse=False, size=False, timestamp=False) -> List[Dict]:
+    def list(
+        self,
+        item: Dict,
+        acl=False,
+        avu=False,
+        contents=False,
+        recurse=False,
+        size=False,
+        timestamp=False,
+    ) -> List[Dict]:
         if recurse:
             raise NotImplementedError("recurse")
 
-        args = {"acl": acl, "avu": avu, "contents": contents,
-                "size": size, "timestamp": timestamp}
+        args = {
+            "acl": acl,
+            "avu": avu,
+            "contents": contents,
+            "size": size,
+            "timestamp": timestamp,
+        }
 
         result = self._execute(BatonClient.LIST, args, item)
         if contents:
@@ -471,10 +496,9 @@ class BatonClient(object):
         args = {BatonClient.OP: BatonClient.REM}
         self._execute(BatonClient.METAMOD, args, item)
 
-    def meta_query(self, avus: List[AVU],
-                   zone=None,
-                   collection=False,
-                   data_object=False) -> List[Union[DataObject, Collection]]:
+    def meta_query(
+        self, avus: List[AVU], zone=None, collection=False, data_object=False
+    ) -> List[Union[DataObject, Collection]]:
         args = {}
         if collection:
             args["collection"] = True
@@ -507,9 +531,11 @@ class BatonClient(object):
 
     @staticmethod
     def _wrap(operation: str, args: Dict, item: Dict) -> Dict:
-        return {BatonClient.OP: operation,
-                BatonClient.ARGS: args,
-                BatonClient.TARGET: item}
+        return {
+            BatonClient.OP: operation,
+            BatonClient.ARGS: args,
+            BatonClient.TARGET: item,
+        }
 
     @staticmethod
     def _unwrap(envelope: Dict) -> Dict:
@@ -518,9 +544,11 @@ class BatonClient(object):
             raise RodsError(err[BatonClient.MSG], err[BatonClient.CODE])
 
         if BatonClient.RESULT not in envelope:
-            raise BatonError("invalid {} operation result "
-                             "(no result)".format(envelope[BatonClient.OP]),
-                             -1)
+            raise BatonError(
+                "invalid {} operation result "
+                "(no result)".format(envelope[BatonClient.OP]),
+                -1,
+            )
 
         if BatonClient.SINGLE in envelope[BatonClient.RESULT]:
             return envelope[BatonClient.RESULT][BatonClient.SINGLE]
@@ -528,14 +556,15 @@ class BatonClient(object):
         if BatonClient.MULTIPLE in envelope[BatonClient.RESULT]:
             return envelope[BatonClient.RESULT][BatonClient.MULTIPLE]
 
-        raise BatonError("Invalid {} operation result "
-                         "(no content)".format(envelope), -1)
+        raise BatonError(
+            "Invalid {} operation result " "(no content)".format(envelope), -1
+        )
 
     def _send(self, envelope: Dict) -> Dict:
         encoded = json.dumps(envelope, cls=BatonJSONEncoder)
         log.debug("Sending {}".format(encoded))
 
-        msg = bytes(encoded, 'utf-8')
+        msg = bytes(encoded, "utf-8")
         self.proc.stdin.write(msg)
         self.proc.stdin.flush()
 
@@ -609,8 +638,9 @@ class RodsItem(PathLike):
 
         return len(to_remove)
 
-    def meta_supersede(self, *avus: Union[AVU, Tuple[AVU]],
-                       history=False, history_date=None) -> Tuple[int, int]:
+    def meta_supersede(
+        self, *avus: Union[AVU, Tuple[AVU]], history=False, history_date=None
+    ) -> Tuple[int, int]:
         """Remove AVUs from the item's metadata that share an attribute with
          any of the argument AVUs and add the argument AVUs to the item's
          metadata. Return the numbers of AVUs added and removed, including any
@@ -630,8 +660,10 @@ class RodsItem(PathLike):
             history_date = datetime.utcnow()
 
         current = self.metadata()
-        log.debug("Superseding AVUs of {}; current: {} "
-                  "new {}".format(self.path, current, avus))
+        log.debug(
+            "Superseding AVUs of {}; current: {} "
+            "new {}".format(self.path, current, avus)
+        )
 
         rem_attrs = set(map(lambda avu: avu.attribute, avus))
         to_remove = set(filter(lambda a: a.attribute in rem_attrs, current))
@@ -708,8 +740,9 @@ class RodsItem(PathLike):
 
         return len(to_remove)
 
-    def ac_supersede(self, *acs: Union[AC, Tuple[AC]],
-                     recurse=False) -> Tuple[int, int]:
+    def ac_supersede(
+        self, *acs: Union[AC, Tuple[AC]], recurse=False
+    ) -> Tuple[int, int]:
         """Remove all access controls from the item, replacing them with the
         specified access controls. Return the numbers of access controls
         removed and added.
@@ -717,8 +750,10 @@ class RodsItem(PathLike):
 
         """
         current = self.acl()
-        log.debug("Superseding ACL of {}; current: {} "
-                  "new {}".format(self.path, current, acs))
+        log.debug(
+            "Superseding ACL of {}; current: {} "
+            "new {}".format(self.path, current, acs)
+        )
 
         to_remove = sorted(list(set(current).difference(acs)))
         if to_remove:
@@ -748,8 +783,7 @@ class RodsItem(PathLike):
         """
         item = self._list(avu=True).pop()
         if BatonClient.AVUS not in item.keys():
-            raise BatonError("{} key missing "
-                             "from {}".format(BatonClient.AVUS, item))
+            raise BatonError("{} key missing " "from {}".format(BatonClient.AVUS, item))
         return sorted(item[BatonClient.AVUS])
 
     def acl(self) -> List[AC]:
@@ -758,8 +792,9 @@ class RodsItem(PathLike):
         Returns: List[AC]"""
         item = self._list(acl=True).pop()
         if BatonClient.ACCESS not in item.keys():
-            raise BatonError("{} key missing "
-                             "from {}".format(BatonClient.ACCESS, item))
+            raise BatonError(
+                "{} key missing " "from {}".format(BatonClient.ACCESS, item)
+            )
         return sorted(item[BatonClient.ACCESS])
 
     @abstractmethod
@@ -785,8 +820,7 @@ class DataObject(RodsItem):
         """
         item = self._list().pop()
         if BatonClient.OBJ not in item.keys():
-            raise BatonError("{} key missing "
-                             "from {}".format(BatonClient.OBJ, item))
+            raise BatonError("{} key missing " "from {}".format(BatonClient.OBJ, item))
 
         return make_rods_item(self.client, item)
 
@@ -816,10 +850,9 @@ class Collection(RodsItem):
     def __init__(self, client: BatonClient, path: Union[PurePath, str]):
         super().__init__(client, path)
 
-    def contents(self,
-                 acl=False,
-                 avu=False,
-                 recurse=False) -> List[Union[DataObject, Collection]]:
+    def contents(
+        self, acl=False, avu=False, recurse=False
+    ) -> List[Union[DataObject, Collection]]:
         """Return list of the Collection contents.
 
         Keyword Args:
@@ -865,20 +898,19 @@ class Collection(RodsItem):
         return self.path.as_posix()
 
 
-def make_rods_item(client: BatonClient,
-                   item: Dict) -> Union[DataObject, Collection]:
+def make_rods_item(client: BatonClient, item: Dict) -> Union[DataObject, Collection]:
     """Create a new Collection or DataObject as appropriate for a dictionary
     returned by a BatonClient.
 
     Returns: Union[DataObject, Collection]
     """
     if BatonClient.COLL not in item.keys():
-        raise BatonError("{} key missing "
-                         "from {}".format(BatonClient.COLL, item))
+        raise BatonError("{} key missing " "from {}".format(BatonClient.COLL, item))
 
     if BatonClient.OBJ in item.keys():
-        return DataObject(client, PurePath(item[BatonClient.COLL],
-                                           item[BatonClient.OBJ]))
+        return DataObject(
+            client, PurePath(item[BatonClient.COLL], item[BatonClient.OBJ])
+        )
     return Collection(client, PurePath(item[BatonClient.COLL]))
 
 
@@ -911,8 +943,13 @@ def imkdir(remote_path: Union[PurePath, str], make_parents=True):
     _run(cmd)
 
 
-def iget(remote_path: Union[PurePath, str], local_path: Union[PurePath, str],
-         force=False, verify_checksum=True, recurse=False):
+def iget(
+    remote_path: Union[PurePath, str],
+    local_path: Union[PurePath, str],
+    force=False,
+    verify_checksum=True,
+    recurse=False,
+):
     cmd = ["iget"]
     if force:
         cmd.append("-f")
@@ -926,8 +963,13 @@ def iget(remote_path: Union[PurePath, str], local_path: Union[PurePath, str],
     _run(cmd)
 
 
-def iput(local_path: Union[PurePath, str], remote_path: Union[PurePath, str],
-         force=False, verify_checksum=True, recurse=False):
+def iput(
+    local_path: Union[PurePath, str],
+    remote_path: Union[PurePath, str],
+    force=False,
+    verify_checksum=True,
+    recurse=False,
+):
     cmd = ["iput"]
     if force:
         cmd.append("-f")

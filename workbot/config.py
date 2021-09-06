@@ -54,8 +54,7 @@ def get_config_paths() -> List[str]:
 
     user = pwd.getpwuid(os.getuid()).pw_name
     home = os.getenv("HOME", os.path.join("home", user))
-    xdg_data_home = os.getenv("XDG_DATA_HOME",
-                              os.path.join(home, ".local", "share"))
+    xdg_data_home = os.getenv("XDG_DATA_HOME", os.path.join(home, ".local", "share"))
 
     override_path = os.environ.get("WORKBOT_CONFIG")
 
@@ -89,8 +88,7 @@ def read_config() -> configparser.ConfigParser:
             conf.read(f)
             return conf
 
-    raise FileNotFoundError("No configuration file found "
-                            "in: {}".format(search))
+    raise FileNotFoundError("No configuration file found " "in: {}".format(search))
 
 
 def load_classes_from_config(conf: configparser.ConfigParser):
@@ -102,7 +100,10 @@ def load_classes_from_config(conf: configparser.ConfigParser):
     for sec in conf.sections():
         for key, value in conf.items(sec):
             if key == "class":
-                module_name, class_name, = parse_qualified_class_name(value)
+                (
+                    module_name,
+                    class_name,
+                ) = parse_qualified_class_name(value)
                 log.debug("Loading {} {}".format(module_name, class_name))
 
                 module = importlib.import_module(module_name)

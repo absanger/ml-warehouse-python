@@ -21,18 +21,27 @@ import re
 from datetime import datetime
 from typing import List, Tuple
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, \
-    String, Text, distinct, func
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    distinct,
+    func,
+)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, relationship
 
 MLWHBase = declarative_base()
 
-ONTTagIdentifierRegex = re.compile(r'.*-(\d+)$')
+ONTTagIdentifierRegex = re.compile(r".*-(\d+)$")
 
 
 class Sample(MLWHBase):
-    __tablename__ = 'sample'
+    __tablename__ = "sample"
 
     id_sample_tmp = Column(Integer, primary_key=True)
     id_lims = Column(String, nullable=False)
@@ -71,11 +80,12 @@ class Sample(MLWHBase):
 
     def __repr__(self):
         return "<Sample: name={}, id_sample_lims={} last_updated={}>".format(
-                self.name, self.id_sample_lims, self.last_updated)
+            self.name, self.id_sample_lims, self.last_updated
+        )
 
 
 class Study(MLWHBase):
-    __tablename__ = 'study'
+    __tablename__ = "study"
 
     id_study_tmp = Column(Integer, primary_key=True)
     id_lims = Column(String, nullable=False)
@@ -120,18 +130,19 @@ class Study(MLWHBase):
 
     def __repr__(self):
         return "<Study: name={}, id_study_lims={} last_updated={}>".format(
-                self.name, self.id_study_lims, self.last_updated)
+            self.name, self.id_study_lims, self.last_updated
+        )
 
 
 class OseqFlowcell(MLWHBase):
-    __tablename__ = 'oseq_flowcell'
+    __tablename__ = "oseq_flowcell"
 
     id_oseq_flowcell_tmp = Column(Integer, primary_key=True)
     id_flowcell_lims = Column(String, nullable=False)
     last_updated = Column(DateTime, nullable=False, default=func.now())
     recorded_at = Column(DateTime, nullable=False, default=func.now())
-    id_sample_tmp = Column(ForeignKey('sample.id_sample_tmp'), nullable=False)
-    id_study_tmp = Column(ForeignKey('study.id_study_tmp'), nullable=False)
+    id_sample_tmp = Column(ForeignKey("sample.id_sample_tmp"), nullable=False)
+    id_study_tmp = Column(ForeignKey("study.id_study_tmp"), nullable=False)
     experiment_name = Column(String, nullable=False)
     instrument_name = Column(String, nullable=False)
     instrument_slot = Column(Integer, nullable=False)
@@ -148,8 +159,8 @@ class OseqFlowcell(MLWHBase):
     deleted_at = Column(DateTime)
     id_lims = Column(String)
 
-    sample = relationship('Sample')
-    study = relationship('Study')
+    sample = relationship("Sample")
+    study = relationship("Study")
 
     @property
     def tag_index(self):
@@ -170,18 +181,21 @@ class OseqFlowcell(MLWHBase):
         return None
 
     def __repr__(self):
-        return "<OseqFlowcell: inst_name={}, inst_slot={} " \
-               "expt_name={} tag_set_name={} tag_id={} " \
-               "last_updated={}>".format(self.instrument_name,
-                                         self.instrument_slot,
-                                         self.experiment_name,
-                                         self.tag_set_name,
-                                         self.tag_identifier,
-                                         self.last_updated)
+        return (
+            "<OseqFlowcell: inst_name={}, inst_slot={} "
+            "expt_name={} tag_set_name={} tag_id={} "
+            "last_updated={}>".format(
+                self.instrument_name,
+                self.instrument_slot,
+                self.experiment_name,
+                self.tag_set_name,
+                self.tag_identifier,
+                self.last_updated,
+            )
+        )
 
 
-def find_recent_ont_expt(session: Session,
-                         since: datetime) -> List[str]:
+def find_recent_ont_expt(session: Session, since: datetime) -> List[str]:
     """Finds recent ONT experiments in the ML warehouse database.
 
     Finds ONT experiments in the ML warehouse database that have been updated
@@ -198,8 +212,11 @@ def find_recent_ont_expt(session: Session,
         List of matching experiment name strings
     """
 
-    result = session.query(distinct(OseqFlowcell.experiment_name)). \
-        filter(OseqFlowcell.last_updated >= since).all()
+    result = (
+        session.query(distinct(OseqFlowcell.experiment_name))
+        .filter(OseqFlowcell.last_updated >= since)
+        .all()
+    )
 
     # The default behaviour of SQLAlchemy is that the result here is a list
     # of tuples, each of which must be unpacked. The official way to do
@@ -209,8 +226,7 @@ def find_recent_ont_expt(session: Session,
     return [value for value, in result]
 
 
-def find_recent_ont_pos(session: Session,
-                        since: datetime) -> List[Tuple]:
+def find_recent_ont_pos(session: Session, since: datetime) -> List[Tuple]:
     """Finds recent ONT experiments and instrument positions in the ML
     warehouse database.
 
@@ -225,23 +241,33 @@ def find_recent_ont_pos(session: Session,
         List of matching (experiment name, position) tuples
     """
 
-    return session.query(OseqFlowcell.experiment_name,
-                         OseqFlowcell.instrument_slot). \
-        filter(OseqFlowcell.last_updated >= since). \
-        group_by(OseqFlowcell.experiment_name,
-                 OseqFlowcell.instrument_slot). \
-        order_by(OseqFlowcell.experiment_name.asc(),
-                 OseqFlowcell.instrument_slot.asc()).all()
+    return (
+        session.query(OseqFlowcell.experiment_name, OseqFlowcell.instrument_slot)
+        .filter(OseqFlowcell.last_updated >= since)
+        .group_by(OseqFlowcell.experiment_name, OseqFlowcell.instrument_slot)
+        .order_by(
+            OseqFlowcell.experiment_name.asc(), OseqFlowcell.instrument_slot.asc()
+        )
+        .all()
+    )
 
 
-def find_ont_plex_info(session: Session, experiment_name: str,
-                       instrument_slot: int) -> List[OseqFlowcell]:
-    flowcells = session.query(OseqFlowcell). \
-        filter(OseqFlowcell.experiment_name == experiment_name,
-               OseqFlowcell.instrument_slot == instrument_slot). \
-        order_by(OseqFlowcell.experiment_name.asc(),
-                 OseqFlowcell.instrument_slot.asc(),
-                 OseqFlowcell.tag_identifier.asc(),
-                 OseqFlowcell.tag2_identifier.asc()).all()
+def find_ont_plex_info(
+    session: Session, experiment_name: str, instrument_slot: int
+) -> List[OseqFlowcell]:
+    flowcells = (
+        session.query(OseqFlowcell)
+        .filter(
+            OseqFlowcell.experiment_name == experiment_name,
+            OseqFlowcell.instrument_slot == instrument_slot,
+        )
+        .order_by(
+            OseqFlowcell.experiment_name.asc(),
+            OseqFlowcell.instrument_slot.asc(),
+            OseqFlowcell.tag_identifier.asc(),
+            OseqFlowcell.tag2_identifier.asc(),
+        )
+        .all()
+    )
 
     return flowcells

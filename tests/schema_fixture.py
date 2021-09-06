@@ -65,10 +65,11 @@ def mysql_url(config: ConfigParser):
     section = "MySQL"
 
     if section not in config.sections():
-        raise ConfigurationError("The {} configuration section is missing. "
-                                 "You need to fill this in before running "
-                                 "tests on a {} database".format(section,
-                                                                 section))
+        raise ConfigurationError(
+            "The {} configuration section is missing. "
+            "You need to fill this in before running "
+            "tests on a {} database".format(section, section)
+        )
     connection_conf = config[section]
     user = connection_conf.get("user", "workbot")
     password = connection_conf.get("password", "")
@@ -76,12 +77,13 @@ def mysql_url(config: ConfigParser):
     port = connection_conf.get("port", "3306")
     schema = connection_conf.get("schema", "workbot")
 
-    return 'mysql+pymysql://{}:{}@{}:{}/{}'.format(user, password,
-                                                   ip_address, port, schema)
+    return "mysql+pymysql://{}:{}@{}:{}/{}".format(
+        user, password, ip_address, port, schema
+    )
 
 
 def sqlite_url(tmp_path: Path):
     """Returns an SQLite URL configured to a temporary path."""
     p = tmp_path / "workbot"
-    url = 'sqlite:///{}'.format(p)
+    url = "sqlite:///{}".format(p)
     return url

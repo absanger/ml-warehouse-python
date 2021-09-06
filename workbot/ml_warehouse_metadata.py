@@ -22,8 +22,7 @@ from itertools import starmap
 from typing import List
 
 from workbot.irods import AC, AVU, Permission
-from workbot.metadata import DublinCore, SampleMetadata, \
-    StudyMetadata
+from workbot.metadata import DublinCore, SampleMetadata, StudyMetadata
 from workbot.ml_warehouse_schema import Sample, Study
 
 
@@ -39,17 +38,24 @@ def make_creation_metadata(creator: str, created: datetime):
 
     Returns: List[AVU]
     """
-    return [AVU(DublinCore.CREATOR.value, creator,
-                namespace=DublinCore.namespace),
-            AVU(DublinCore.CREATED.value,
-                created.isoformat(timespec="seconds"),
-                namespace=DublinCore.namespace)]
+    return [
+        AVU(DublinCore.CREATOR.value, creator, namespace=DublinCore.namespace),
+        AVU(
+            DublinCore.CREATED.value,
+            created.isoformat(timespec="seconds"),
+            namespace=DublinCore.namespace,
+        ),
+    ]
 
 
 def make_modification_metadata(modified: datetime):
-    return [AVU(DublinCore.MODIFIED.value,
-                modified.isoformat(timespec="seconds"),
-                namespace=DublinCore.namespace)]
+    return [
+        AVU(
+            DublinCore.MODIFIED.value,
+            modified.isoformat(timespec="seconds"),
+            namespace=DublinCore.namespace,
+        )
+    ]
 
 
 def avu_if_value(attribute, value):
@@ -72,29 +78,27 @@ def make_sample_metadata(sample: Sample) -> List[AVU]:
 
     Returns: List[AVU]
     """
-    av = [[SampleMetadata.SAMPLE_ID.value,
-           sample.sanger_sample_id],
-          [SampleMetadata.SAMPLE_NAME.value,
-           sample.name],
-          [SampleMetadata.SAMPLE_ACCESSION_NUMBER.value,
-           sample.accession_number],
-          [SampleMetadata.SAMPLE_DONOR_ID.value,
-           sample.donor_id],
-          [SampleMetadata.SAMPLE_SUPPLIER_NAME.value,
-           sample.supplier_name],
-          [SampleMetadata.SAMPLE_CONSENT_WITHDRAWN.value,
-           1 if sample.consent_withdrawn else None]]
+    av = [
+        [SampleMetadata.SAMPLE_ID.value, sample.sanger_sample_id],
+        [SampleMetadata.SAMPLE_NAME.value, sample.name],
+        [SampleMetadata.SAMPLE_ACCESSION_NUMBER.value, sample.accession_number],
+        [SampleMetadata.SAMPLE_DONOR_ID.value, sample.donor_id],
+        [SampleMetadata.SAMPLE_SUPPLIER_NAME.value, sample.supplier_name],
+        [
+            SampleMetadata.SAMPLE_CONSENT_WITHDRAWN.value,
+            1 if sample.consent_withdrawn else None,
+        ],
+    ]
 
     return list(filter(lambda avu: avu is not None, starmap(avu_if_value, av)))
 
 
 def make_study_metadata(study: Study):
-    av = [[StudyMetadata.STUDY_ID.value,
-           study.id_study_lims],
-          [StudyMetadata.STUDY_NAME.value,
-           study.name],
-          [StudyMetadata.STUDY_ACCESSION_NUMBER.value,
-           study.accession_number]]
+    av = [
+        [StudyMetadata.STUDY_ID.value, study.id_study_lims],
+        [StudyMetadata.STUDY_NAME.value, study.name],
+        [StudyMetadata.STUDY_ACCESSION_NUMBER.value, study.accession_number],
+    ]
 
     return list(filter(lambda avu: avu is not None, starmap(avu_if_value, av)))
 
@@ -104,6 +108,7 @@ def make_sample_acl(sample: Sample, study: Study) -> List[AC]:
     perm = Permission.NULL if sample.consent_withdrawn else Permission.READ
 
     return [AC(irods_group, perm)]
+
 
 # FIXME
 # def make_ont_metadata(flowcell: OseqFlowcell):

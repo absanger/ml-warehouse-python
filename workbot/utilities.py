@@ -21,8 +21,6 @@ from argparse import ArgumentTypeError
 from datetime import datetime
 from typing import Tuple
 
-from workbot.enums import WorkType
-
 
 def is_builtins_module(module_name: str) -> bool:
     """Returns true if the named module is the builtins module."""
@@ -72,21 +70,3 @@ def valid_iso_date(s: str) -> datetime:
         return datetime.fromisoformat(s)
     except ValueError:
         raise ArgumentTypeError("Invalid date: '{}'.".format(s))
-
-
-def valid_work_type(s: str) -> WorkType:
-    """Parse a work type or  raise an ArgumentTypeError.
-
-    Args:
-        s: A work type name.
-
-    Returns: a WorkType enum member.
-    """
-    try:
-        wt = WorkType[s]
-    except KeyError:
-        avail = [wt.name for wt in WorkType]
-        raise ArgumentTypeError("Unknown work type: '{}'. "
-                                "Available types are: {}".format(s, avail))
-
-    return wt

@@ -16,12 +16,9 @@ def initialize_mlwh(session: Session):
     pipeline_id_lims = "Ligation"
     req_data_type = "Basecalls and raw data"
 
-    study_x = Study(id_lims="LIMS_01", id_study_lims="study_01",
-                    name="Study X")
-    study_y = Study(id_lims="LIMS_01", id_study_lims="study_02",
-                    name="Study Y")
-    study_z = Study(id_lims="LIMS_01", id_study_lims="study_03",
-                    name="Study Z")
+    study_x = Study(id_lims="LIMS_01", id_study_lims="study_01", name="Study X")
+    study_y = Study(id_lims="LIMS_01", id_study_lims="study_02", name="Study Y")
+    study_z = Study(id_lims="LIMS_01", id_study_lims="study_03", name="Study Z")
     session.add_all([study_x, study_y, study_z])
     session.flush()
 
@@ -32,8 +29,7 @@ def initialize_mlwh(session: Session):
     for s in range(1, num_samples + 1):
         sid = "sample{}".format(s)
         name = "sample {}".format(s)
-        samples.append(Sample(id_lims="LIMS_01", id_sample_lims=sid,
-                              name=name))
+        samples.append(Sample(id_lims="LIMS_01", id_sample_lims=sid, name=name))
     session.add_all(samples)
     session.flush()
 
@@ -49,32 +45,37 @@ def initialize_mlwh(session: Session):
             # All the odd experiments have the late datetime
             when_expt = EARLY if expt % 2 == 0 else LATE
 
-            flowcells.append(OseqFlowcell(sample=samples[sample_idx],
-                                          study=study_y,
-                                          instrument_name=instrument_name,
-                                          instrument_slot=pos,
-                                          experiment_name=expt_name,
-                                          id_flowcell_lims=id_flowcell,
-                                          pipeline_id_lims=pipeline_id_lims,
-                                          requested_data_type=req_data_type,
-                                          last_updated=when_expt))
+            flowcells.append(
+                OseqFlowcell(
+                    sample=samples[sample_idx],
+                    study=study_y,
+                    instrument_name=instrument_name,
+                    instrument_slot=pos,
+                    experiment_name=expt_name,
+                    id_flowcell_lims=id_flowcell,
+                    pipeline_id_lims=pipeline_id_lims,
+                    requested_data_type=req_data_type,
+                    last_updated=when_expt,
+                )
+            )
             sample_idx += 1
 
     num_multiplexed_expts = 3
     num_instrument_pos = 5
-    barcodes = ["CACAAAGACACCGACAACTTTCTT",
-                "ACAGACGACTACAAACGGAATCGA",
-                "CCTGGTAACTGGGACACAAGACTC",
-                "TAGGGAAACACGATAGAATCCGAA",
-                "AAGGTTACACAAACCCTGGACAAG",
-                "GACTACTTTCTGCCTTTGCGAGAA",
-
-                "AAGGATTCATTCCCACGGTAACAC",
-                "ACGTAACTTGGTTTGTTCCCTGAA",
-                "AACCAAGACTCGCTGTGCCTAGTT",
-                "GAGAGGACAAAGGTTTCAACGCTT",
-                "TCCATTCCCTCCGATAGATGAAAC",
-                "TCCGATTCTGCTTCTTTCTACCTG"]
+    barcodes = [
+        "CACAAAGACACCGACAACTTTCTT",
+        "ACAGACGACTACAAACGGAATCGA",
+        "CCTGGTAACTGGGACACAAGACTC",
+        "TAGGGAAACACGATAGAATCCGAA",
+        "AAGGTTACACAAACCCTGGACAAG",
+        "GACTACTTTCTGCCTTTGCGAGAA",
+        "AAGGATTCATTCCCACGGTAACAC",
+        "ACGTAACTTGGTTTGTTCCCTGAA",
+        "AACCAAGACTCGCTGTGCCTAGTT",
+        "GAGAGGACAAAGGTTTCAACGCTT",
+        "TCCATTCCCTCCGATAGATGAAAC",
+        "TCCGATTCTGCTTCTTTCTACCTG",
+    ]
 
     msample_idx = 0
     for expt in range(1, num_multiplexed_expts + 1):
@@ -95,7 +96,8 @@ def initialize_mlwh(session: Session):
             for barcode_idx, barcode in enumerate(barcodes):
                 tag_id = "ONT_EXP-012-{:02d}".format(barcode_idx + 1)
 
-                flowcells.append(OseqFlowcell(
+                flowcells.append(
+                    OseqFlowcell(
                         sample=samples[msample_idx],
                         study=study_z,
                         instrument_name=instrument_name,
@@ -108,7 +110,9 @@ def initialize_mlwh(session: Session):
                         tag_identifier=tag_id,
                         pipeline_id_lims=pipeline_id_lims,
                         requested_data_type=req_data_type,
-                        last_updated=when))
+                        last_updated=when,
+                    )
+                )
                 msample_idx += 1
 
     session.add_all(flowcells)
@@ -118,7 +122,7 @@ def initialize_mlwh(session: Session):
 @pytest.fixture(scope="function")
 def mlwh_session(tmp_path) -> Session:
     p = tmp_path / "mlwh"
-    uri = 'sqlite:///{}'.format(p)
+    uri = "sqlite:///{}".format(p)
 
     engine = create_engine(uri, echo=False)
     MLWHBase.metadata.create_all(engine)

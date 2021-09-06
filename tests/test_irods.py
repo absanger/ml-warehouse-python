@@ -5,8 +5,15 @@ import pytest
 from pytest import mark as m
 
 from tests.irods_fixture import baton_session, irods_gridion
-from workbot.irods import AVU, AC, BatonClient, Collection, \
-    DataObject, Permission, RodsError
+from workbot.irods import (
+    AVU,
+    AC,
+    BatonClient,
+    Collection,
+    DataObject,
+    Permission,
+    RodsError,
+)
 
 #  Stop IDEs "optimizing" away these imports
 _ = irods_gridion
@@ -57,8 +64,12 @@ class TestBatonClient(object):
 
     @m.it("Can list collection contents")
     def test_list_collection_contents(self, irods_gridion, baton_session):
-        p = PurePath(irods_gridion, "66", "DN585561I_A1",
-                     "20190904_1514_GA20000_FAL01979_43578c8f")
+        p = PurePath(
+            irods_gridion,
+            "66",
+            "DN585561I_A1",
+            "20190904_1514_GA20000_FAL01979_43578c8f",
+        )
 
         coll = Collection(baton_session, p)
         contents = coll.contents()
@@ -66,9 +77,13 @@ class TestBatonClient(object):
 
     @m.it("Can list a data object")
     def test_list_data_object(self, irods_gridion, baton_session):
-        p = PurePath(irods_gridion, "66", "DN585561I_A1",
-                     "20190904_1514_GA20000_FAL01979_43578c8f",
-                     "final_summary.txt")
+        p = PurePath(
+            irods_gridion,
+            "66",
+            "DN585561I_A1",
+            "20190904_1514_GA20000_FAL01979_43578c8f",
+            "final_summary.txt",
+        )
 
         obj = DataObject(baton_session, p)
         assert obj.list() == DataObject(baton_session, p)
@@ -87,9 +102,13 @@ class TestBatonClient(object):
 
     @m.it("Can test existence of a data object")
     def test_exists_data_object(self, irods_gridion, baton_session):
-        p = PurePath(irods_gridion, "66", "DN585561I_A1",
-                     "20190904_1514_GA20000_FAL01979_43578c8f",
-                     "final_summary.txt")
+        p = PurePath(
+            irods_gridion,
+            "66",
+            "DN585561I_A1",
+            "20190904_1514_GA20000_FAL01979_43578c8f",
+            "final_summary.txt",
+        )
 
         obj = DataObject(baton_session, p)
         assert obj.exists()
@@ -99,8 +118,12 @@ class TestBatonClient(object):
 
     @m.it("Can add metadata to a collection")
     def test_meta_add_collection(self, irods_gridion, baton_session):
-        p = PurePath(irods_gridion, "66", "DN585561I_A1",
-                     "20190904_1514_GA20000_FAL01979_43578c8f")
+        p = PurePath(
+            irods_gridion,
+            "66",
+            "DN585561I_A1",
+            "20190904_1514_GA20000_FAL01979_43578c8f",
+        )
         coll = Collection(baton_session, p)
         assert coll.metadata() == []
 
@@ -111,13 +134,18 @@ class TestBatonClient(object):
         assert avu1 in coll.metadata()
         assert avu2 in coll.metadata()
 
-        assert coll.meta_add(avu1, avu2) == 0, \
-            "adding collection metadata is idempotent"
+        assert (
+            coll.meta_add(avu1, avu2) == 0
+        ), "adding collection metadata is idempotent"
 
     @m.it("Can remove metadata from a collection")
     def test_meta_rem_collection(self, irods_gridion, baton_session):
-        p = PurePath(irods_gridion, "66", "DN585561I_A1",
-                     "20190904_1514_GA20000_FAL01979_43578c8f")
+        p = PurePath(
+            irods_gridion,
+            "66",
+            "DN585561I_A1",
+            "20190904_1514_GA20000_FAL01979_43578c8f",
+        )
         coll = Collection(baton_session, p)
         assert coll.metadata() == []
 
@@ -128,14 +156,19 @@ class TestBatonClient(object):
         assert coll.meta_remove(avu1, avu2) == 2
         assert avu1 not in coll.metadata()
         assert avu2 not in coll.metadata()
-        assert coll.meta_remove(avu1, avu2) == 0, \
-            "removing collection metadata is idempotent"
+        assert (
+            coll.meta_remove(avu1, avu2) == 0
+        ), "removing collection metadata is idempotent"
 
     @m.it("Can add metadata to a data object")
     def test_meta_add_data_object(self, irods_gridion, baton_session):
-        p = PurePath(irods_gridion, "66", "DN585561I_A1",
-                     "20190904_1514_GA20000_FAL01979_43578c8f",
-                     "final_summary.txt")
+        p = PurePath(
+            irods_gridion,
+            "66",
+            "DN585561I_A1",
+            "20190904_1514_GA20000_FAL01979_43578c8f",
+            "final_summary.txt",
+        )
         obj = DataObject(baton_session, p)
         assert obj.metadata() == []
 
@@ -146,14 +179,19 @@ class TestBatonClient(object):
         assert avu1 in obj.metadata()
         assert avu2 in obj.metadata()
 
-        assert obj.meta_add(avu1, avu2) == 0, \
-            "adding data object metadata is idempotent"
+        assert (
+            obj.meta_add(avu1, avu2) == 0
+        ), "adding data object metadata is idempotent"
 
     @m.it("Can remove metadata from a data object")
     def test_meta_rem_data_object(self, irods_gridion, baton_session):
-        p = PurePath(irods_gridion, "66", "DN585561I_A1",
-                     "20190904_1514_GA20000_FAL01979_43578c8f",
-                     "final_summary.txt")
+        p = PurePath(
+            irods_gridion,
+            "66",
+            "DN585561I_A1",
+            "20190904_1514_GA20000_FAL01979_43578c8f",
+            "final_summary.txt",
+        )
         obj = DataObject(baton_session, p)
         assert obj.metadata() == []
 
@@ -164,14 +202,19 @@ class TestBatonClient(object):
         assert obj.meta_remove(avu1, avu2) == 2
         assert avu1 not in obj.metadata()
         assert avu2 not in obj.metadata()
-        assert obj.meta_remove(avu1, avu2) == 0, \
-            "removing data object metadata is idempotent"
+        assert (
+            obj.meta_remove(avu1, avu2) == 0
+        ), "removing data object metadata is idempotent"
 
     @m.it("Can replace metadata on a data object")
     def test_meta_rep_data_object(self, irods_gridion, baton_session):
-        p = PurePath(irods_gridion, "66", "DN585561I_A1",
-                     "20190904_1514_GA20000_FAL01979_43578c8f",
-                     "final_summary.txt")
+        p = PurePath(
+            irods_gridion,
+            "66",
+            "DN585561I_A1",
+            "20190904_1514_GA20000_FAL01979_43578c8f",
+            "final_summary.txt",
+        )
         obj = DataObject(baton_session, p)
         assert obj.metadata() == []
 
@@ -179,12 +222,16 @@ class TestBatonClient(object):
         avu2 = AVU("vwxyz", "567890")
         obj.meta_add(avu1, avu2)
 
-        assert obj.meta_supersede(avu1, avu2) == (0, 0), \
-            "nothing is replaced when new all AVUs == all old AVUs"
+        assert obj.meta_supersede(avu1, avu2) == (
+            0,
+            0,
+        ), "nothing is replaced when new all AVUs == all old AVUs"
         assert obj.metadata() == [avu1, avu2]
 
-        assert obj.meta_supersede(avu1) == (0, 0), \
-            "nothing is replaced when one new AVU is in the AVUs"
+        assert obj.meta_supersede(avu1) == (
+            0,
+            0,
+        ), "nothing is replaced when one new AVU is in the AVUs"
         assert obj.metadata() == [avu1, avu2]
 
         avu3 = AVU("abcde", "88888")
@@ -194,80 +241,103 @@ class TestBatonClient(object):
         avu4 = AVU("abcde", "99999")
         avu5 = AVU("abcde", "00000")
         date = datetime.utcnow()
-        assert obj.meta_supersede(avu4, avu5, history=True,
-                                  history_date=date) == (2, 3), \
-            "AVUs sharing an attribute with a new AVU are replaced"
+        assert obj.meta_supersede(avu4, avu5, history=True, history_date=date) == (
+            2,
+            3,
+        ), "AVUs sharing an attribute with a new AVU are replaced"
 
-        history = AVU("abcde_history",
-                      "[{}] {},{}".format(date.isoformat(timespec="seconds"),
-                                          avu1.value,
-                                          avu3.value))
+        history = AVU(
+            "abcde_history",
+            "[{}] {},{}".format(
+                date.isoformat(timespec="seconds"), avu1.value, avu3.value
+            ),
+        )
         expected = [avu2, avu4, avu5, history]
         expected.sort()
         assert obj.metadata() == expected
 
     @m.it("Can find a collection by its metadata")
     def test_meta_query_collection(self, irods_gridion, baton_session):
-        p = PurePath(irods_gridion, "66", "DN585561I_A1",
-                     "20190904_1514_GA20000_FAL01979_43578c8f")
+        p = PurePath(
+            irods_gridion,
+            "66",
+            "DN585561I_A1",
+            "20190904_1514_GA20000_FAL01979_43578c8f",
+        )
         coll = Collection(baton_session, p)
 
         avu = AVU("abcde", "12345")
         coll.meta_add(avu)
         assert coll.metadata() == [avu]
 
-        found = baton_session.meta_query([avu], collection=True,
-                                         zone=irods_gridion)
+        found = baton_session.meta_query([avu], collection=True, zone=irods_gridion)
         assert found == [Collection(baton_session, p)]
 
     @m.it("Can find a data object by its metadata")
     def test_meta_query_data_object(self, irods_gridion, baton_session):
-        p = PurePath(irods_gridion, "66", "DN585561I_A1",
-                     "20190904_1514_GA20000_FAL01979_43578c8f",
-                     "final_summary.txt")
+        p = PurePath(
+            irods_gridion,
+            "66",
+            "DN585561I_A1",
+            "20190904_1514_GA20000_FAL01979_43578c8f",
+            "final_summary.txt",
+        )
         obj = DataObject(baton_session, p)
 
         avu = AVU("abcde", "12345")
         obj.meta_add(avu)
         assert obj.metadata() == [avu]
 
-        found = baton_session.meta_query([avu], data_object=True,
-                                         zone=irods_gridion)
+        found = baton_session.meta_query([avu], data_object=True, zone=irods_gridion)
         assert found == [DataObject(baton_session, p)]
 
     @m.it("Can add access control to a data object")
     def test_add_ac_data_object(self, irods_gridion, baton_session):
-        p = PurePath(irods_gridion, "66", "DN585561I_A1",
-                     "20190904_1514_GA20000_FAL01979_43578c8f",
-                     "final_summary.txt")
+        p = PurePath(
+            irods_gridion,
+            "66",
+            "DN585561I_A1",
+            "20190904_1514_GA20000_FAL01979_43578c8f",
+            "final_summary.txt",
+        )
 
         obj = DataObject(baton_session, p)
         assert obj.acl() == [AC("irods", Permission.OWN, zone="testZone")]
 
-        assert obj.ac_add(AC("irods", Permission.OWN, zone="testZone")) == 0, \
-            "nothing is replaced when new ACL == all old ACL"
+        assert (
+            obj.ac_add(AC("irods", Permission.OWN, zone="testZone")) == 0
+        ), "nothing is replaced when new ACL == all old ACL"
         assert obj.acl() == [AC("irods", Permission.OWN, zone="testZone")]
 
         assert obj.ac_add(AC("public", Permission.READ, zone="testZone")) == 1
-        assert obj.acl() == [AC("irods", Permission.OWN, zone="testZone"),
-                             AC("public", Permission.READ, zone="testZone")]
+        assert obj.acl() == [
+            AC("irods", Permission.OWN, zone="testZone"),
+            AC("public", Permission.READ, zone="testZone"),
+        ]
 
     @m.it("Can remove access control from a data object")
     def test_rem_ac_data_object(self, irods_gridion, baton_session):
-        p = PurePath(irods_gridion, "66", "DN585561I_A1",
-                     "20190904_1514_GA20000_FAL01979_43578c8f",
-                     "final_summary.txt")
+        p = PurePath(
+            irods_gridion,
+            "66",
+            "DN585561I_A1",
+            "20190904_1514_GA20000_FAL01979_43578c8f",
+            "final_summary.txt",
+        )
 
         obj = DataObject(baton_session, p)
         assert obj.acl() == [AC("irods", Permission.OWN, zone="testZone")]
 
-        assert obj.ac_rem(AC("public", Permission.READ, zone="testZone")) == 0, \
-            "nothing is removed when the access control does not exist"
+        assert (
+            obj.ac_rem(AC("public", Permission.READ, zone="testZone")) == 0
+        ), "nothing is removed when the access control does not exist"
         assert obj.acl() == [AC("irods", Permission.OWN, zone="testZone")]
 
         assert obj.ac_add(AC("public", Permission.READ, zone="testZone")) == 1
-        assert obj.acl() == [AC("irods", Permission.OWN, zone="testZone"),
-                             AC("public", Permission.READ, zone="testZone")]
+        assert obj.acl() == [
+            AC("irods", Permission.OWN, zone="testZone"),
+            AC("public", Permission.READ, zone="testZone"),
+        ]
 
         assert obj.ac_rem(AC("public", Permission.READ, zone="testZone")) == 1
         assert obj.acl() == [AC("irods", Permission.OWN, zone="testZone")]
@@ -277,35 +347,44 @@ class TestBatonClient(object):
 class TestAC(object):
     @m.describe("Comparison")
     def test_compare_acs_equal(self, irods_gridion):
-        assert AC("irods", Permission.OWN, zone="testZone") == \
-               AC("irods", Permission.OWN, zone="testZone")
+        assert AC("irods", Permission.OWN, zone="testZone") == AC(
+            "irods", Permission.OWN, zone="testZone"
+        )
 
-        assert AC("irods", Permission.OWN, zone="testZone") != \
-               AC("irods", Permission.READ, zone="testZone")
+        assert AC("irods", Permission.OWN, zone="testZone") != AC(
+            "irods", Permission.READ, zone="testZone"
+        )
 
-        assert AC("irods", Permission.OWN, zone="testZone") != \
-               AC("public", Permission.OWN, zone="testZone")
+        assert AC("irods", Permission.OWN, zone="testZone") != AC(
+            "public", Permission.OWN, zone="testZone"
+        )
 
     def test_compare_acs_lt(self):
-        assert AC("irods", Permission.OWN, zone="testZone") < \
-               AC("public", Permission.OWN, zone="testZone")
+        assert AC("irods", Permission.OWN, zone="testZone") < AC(
+            "public", Permission.OWN, zone="testZone"
+        )
 
-        assert AC("irods", Permission.NULL, zone="testZone") < \
-               AC("irods", Permission.OWN, zone="testZone")
+        assert AC("irods", Permission.NULL, zone="testZone") < AC(
+            "irods", Permission.OWN, zone="testZone"
+        )
 
     def test_compare_acs_sort(self):
-        acl = [AC("zzz", Permission.OWN, zone="testZone"),
-               AC("aaa", Permission.WRITE, zone="testZone"),
-               AC("aaa", Permission.READ, zone="testZone"),
-               AC("zyy", Permission.READ, zone="testZone"),
-               AC("zyy", Permission.OWN, zone="testZone")]
+        acl = [
+            AC("zzz", Permission.OWN, zone="testZone"),
+            AC("aaa", Permission.WRITE, zone="testZone"),
+            AC("aaa", Permission.READ, zone="testZone"),
+            AC("zyy", Permission.READ, zone="testZone"),
+            AC("zyy", Permission.OWN, zone="testZone"),
+        ]
         acl.sort()
 
-        assert acl == [AC("aaa", Permission.READ, zone="testZone"),
-                       AC("aaa", Permission.WRITE, zone="testZone"),
-                       AC("zyy", Permission.OWN, zone="testZone"),
-                       AC("zyy", Permission.READ, zone="testZone"),
-                       AC("zzz", Permission.OWN, zone="testZone")]
+        assert acl == [
+            AC("aaa", Permission.READ, zone="testZone"),
+            AC("aaa", Permission.WRITE, zone="testZone"),
+            AC("zyy", Permission.OWN, zone="testZone"),
+            AC("zyy", Permission.READ, zone="testZone"),
+            AC("zzz", Permission.OWN, zone="testZone"),
+        ]
 
 
 @m.describe("AVU")
@@ -317,11 +396,9 @@ class TestAVU(object):
 
         assert AVU("a", 1) != AVU("a", 1, "mm")
 
-        assert AVU("a", 1).with_namespace("x") == \
-               AVU("a", 1).with_namespace("x")
+        assert AVU("a", 1).with_namespace("x") == AVU("a", 1).with_namespace("x")
 
-        assert AVU("a", 1).with_namespace("x") != \
-               AVU("a", 1).with_namespace("y")
+        assert AVU("a", 1).with_namespace("x") != AVU("a", 1).with_namespace("y")
 
     def test_compare_avus_lt(self):
         assert AVU("a", 1) < AVU("b", 1)
@@ -334,8 +411,7 @@ class TestAVU(object):
         assert AVU("a", 1).with_namespace("x") < AVU("a", 1)
         assert AVU("z", 99).with_namespace("x") < AVU("a", 1)
 
-        assert AVU("a", 1).with_namespace("x") < \
-               AVU("a", 1).with_namespace("y")
+        assert AVU("a", 1).with_namespace("x") < AVU("a", 1).with_namespace("y")
 
     def test_compare_avus_sort(self):
         x = [AVU("z", 1), AVU("y", 1), AVU("x", 1)]
@@ -350,8 +426,7 @@ class TestAVU(object):
         x = [AVU("z", 1).with_namespace("a"), AVU("y", 1), AVU("x", 1)]
         x.sort()
 
-        assert x == [AVU("z", 1).with_namespace("a"),
-                     AVU("x", 1), AVU("y", 1)]
+        assert x == [AVU("z", 1).with_namespace("a"), AVU("x", 1), AVU("y", 1)]
 
     def test_compare_avus_sort_units(self):
         x = [AVU("x", 1, "mm"), AVU("x", 1, "cm"), AVU("x", 1, "km")]
@@ -388,9 +463,13 @@ class TestDataObject(object):
     @m.context("When a DataObject is made from a str path")
     @m.it("Can be created")
     def test_make_data_object_str(self, irods_gridion, baton_session):
-        p = PurePath(irods_gridion, "66", "DN585561I_A1",
-                     "20190904_1514_GA20000_FAL01979_43578c8f",
-                     "final_summary.txt")
+        p = PurePath(
+            irods_gridion,
+            "66",
+            "DN585561I_A1",
+            "20190904_1514_GA20000_FAL01979_43578c8f",
+            "final_summary.txt",
+        )
         obj = DataObject(baton_session, p.as_posix())
 
         assert obj.exists()
@@ -400,9 +479,13 @@ class TestDataObject(object):
     @m.context("When a DataObject is made from a pathlib.Path")
     @m.it("Can be created")
     def test_make_data_object_pathlib(self, irods_gridion, baton_session):
-        p = PurePath(irods_gridion, "66", "DN585561I_A1",
-                     "20190904_1514_GA20000_FAL01979_43578c8f",
-                     "final_summary.txt")
+        p = PurePath(
+            irods_gridion,
+            "66",
+            "DN585561I_A1",
+            "20190904_1514_GA20000_FAL01979_43578c8f",
+            "final_summary.txt",
+        )
         obj = DataObject(baton_session, p)
 
         assert obj.exists()
