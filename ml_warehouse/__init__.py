@@ -23,7 +23,7 @@ import threading
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from workbot.ml_warehouse_schema import MLWHBase
+from ml_warehouse.ml_warehouse_schema import MLWHBase
 
 
 class ConfigurationError(Exception):

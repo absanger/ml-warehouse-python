@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(
-    name='workbot',
+    name='ml_warehouse',
     version='0.1.0',
-    packages=['workbot'],
+    packages=['ml_warehouse'],
     url='https://github.com/kjsanger/workbot',
     license='GPL3',
     author='Keith James',

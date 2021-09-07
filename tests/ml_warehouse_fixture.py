@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from workbot.ml_warehouse_schema import MLWHBase, OseqFlowcell, Sample, Study
+from ml_warehouse.ml_warehouse_schema import MLWHBase, OseqFlowcell, Sample, Study
 
 EARLY = datetime(year=2020, month=6, day=1, hour=0, minute=0, second=0)
 LATE = datetime(year=2020, month=6, day=14, hour=0, minute=0, second=0)
