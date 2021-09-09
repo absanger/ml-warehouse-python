@@ -15,9 +15,26 @@ url = "mysql+pymysql://{user}:{passw}@{host}:{port}/{db}?charset=utf8mb4".format
     db = DBNAME
 )
 
+# Generate the declarative mappings.
 subprocess.run(
     [
         "sqlacodegen",
-        url
+        url,
+        "--outfile",
+        "generated.py",
     ]
 )
+
+# Workaround issue with CHAR.
+subprocess.run(
+    [
+        "sed",
+        "-i.bu",
+        "/sqlalchemy.dialects.mysql/s/CHAR, *//",
+        "generated.py"
+    ]
+)
+os.remove("generated.py.bu")
+
+# Move the generated file.
+os.rename("generated.py", "ml_warehouse/ml_warehouse_schema_new.py")
