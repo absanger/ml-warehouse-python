@@ -1,5 +1,6 @@
 import os
 import subprocess
+import black
 
 PW = os.environ["MYSQL_PW"]
 USER = os.environ["MYSQL_USER"]
@@ -8,11 +9,7 @@ PORT = os.environ["MYSQL_PORT"]
 DBNAME = os.environ["MYSQL_DBNAME"]
 
 url = "mysql+pymysql://{user}:{passw}@{host}:{port}/{db}?charset=utf8mb4".format(
-    user = USER,
-    passw = PW,
-    host = HOST,
-    port = PORT,
-    db = DBNAME
+    user=USER, passw=PW, host=HOST, port=PORT, db=DBNAME
 )
 
 # Generate the declarative mappings.
@@ -27,14 +24,12 @@ subprocess.run(
 
 # Workaround issue with CHAR.
 subprocess.run(
-    [
-        "sed",
-        "-i.bu",
-        "/sqlalchemy.dialects.mysql/s/CHAR, *//",
-        "generated.py"
-    ]
+    ["sed", "-i.bu", "/sqlalchemy.dialects.mysql/s/CHAR, *//", "generated.py"]
 )
 os.remove("generated.py.bu")
 
 # Move the generated file.
 os.rename("generated.py", "ml_warehouse/ml_warehouse_schema_new.py")
+
+# Prettify the generated file.
+black.format_file_in_place("ml_warehouse/ml_warehouse_schema_new.py")
