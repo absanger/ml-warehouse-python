@@ -25,14 +25,13 @@ class TestMLWarehouseQueries(object):
 
         pass
 
+
 @m.describe("Resilience to modifiying the database schema")
 class TestMLWarehouseResilience(object):
     @m.it("Successfully retrieves a record of study after a column is added")
     def test_added_column_resilience(self, mlwh_session: Session):
 
-        mlwh_session.execute(
-            "ALTER TABLE study ADD COLUMN extra_column INT;"
-        )
+        mlwh_session.execute("ALTER TABLE study ADD COLUMN extra_column INT;")
         mlwh_session.commit()
 
         studies = mlwh_session.query(Study).all()
@@ -42,23 +41,18 @@ class TestMLWarehouseResilience(object):
     @m.it("Successfully retrieves records after column type has been extended")
     def test_extended_column_type_resilience(self, mlwh_session: Session):
 
-        mlwh_session.execute(
-            "ALTER TABLE oseq_flowcell MODIFY instrument_slot BIGINT;"
-        )
+        mlwh_session.execute("ALTER TABLE oseq_flowcell MODIFY instrument_slot BIGINT;")
         mlwh_session.commit()
 
         oseq_flowcells = mlwh_session.query(OseqFlowcell).all()
 
         assert len(oseq_flowcells) > 0
 
-
     @m.it("Fail to retreive records after a column has been dropped")
     @m.xfail(raises=sqlalchemy.exc.OperationalError, strict=True)
-    def test_dropped_column_resilience(self, mlwh_session: Session): 
+    def test_dropped_column_resilience(self, mlwh_session: Session):
 
-        mlwh_session.execute(
-            "ALTER TABLE study DROP COLUMN name;"
-        )
+        mlwh_session.execute("ALTER TABLE study DROP COLUMN name;")
         mlwh_session.commit()
 
         studies = mlwh_session.query(Study).all()
