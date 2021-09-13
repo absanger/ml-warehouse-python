@@ -1,6 +1,6 @@
 import re
 
-from ml_warehouse.schema import *
+from ml_warehouse.ml_warehouse_schema import *
 from sqlalchemy import func
 
 ONTTagIdentifierRegex = re.compile(r".*-(\d+)$")
