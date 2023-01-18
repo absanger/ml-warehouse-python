@@ -19,6 +19,8 @@ from ml_warehouse.schema import (
     IseqRunStatusDict,
     OseqFlowcell,
     PacBioRun,
+    PacBioRunWellMetrics,
+    PacBioProductMetrics,
     Sample,
     StockResource,
     Study,
@@ -81,6 +83,12 @@ def initialize_mlwh(session: Session):
     insert_from_yaml(session, PacBioRun, "tests/fixtures/300-PacBioRun.yml")
     insert_from_yaml(
         session, IseqRunLaneMetrics, "tests/fixtures/400-IseqRunLaneMetric.yml"
+    )
+    insert_from_yaml(
+        session, PacBioProductMetrics, "tests/fixtures/400-PacBioProductMetrics.yml"
+    )
+    insert_from_yaml(
+        session, PacBioRunWellMetrics, "tests/fixtures/400-PacBioRunWellMetrics.yml"
     )
 
 

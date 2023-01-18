@@ -22,7 +22,7 @@ from typing import List
 
 import structlog
 from npg_id_generation.pac_bio import PacBioEntity
-from sqlalchemy import Column, Table, select, update, bindparam
+from sqlalchemy import Column, select, update, bindparam, join
 from sqlalchemy.engine import Row
 from sqlalchemy.orm import Session
 
@@ -36,11 +36,7 @@ def get_rows(
     session: Session,
     start_date: datetime,
     end_date: datetime,
-    columns: List[Column | Table] = [
-        PacBioRun,
-        PacBioRunWellMetrics,
-        PacBioProductMetrics,
-    ],
+    columns: List[Column] = [PacBioRun.pac_bio_run_name, PacBioRun.well_label],
     exclude: List[Column] = None,
 ) -> list[Row]:
     """Returns the specified fields from joined rows of PacBioRun,
@@ -51,7 +47,7 @@ def get_rows(
         start_date: The datetime to begin from when backfilling.
         end_date:   The datetime to end at when backfilling.
         columns:    A list of columns to return.
-                    Optional, defaults to returning all.
+                    Optional, defaults to run name and well label.
         exclude:    A list of columns to exclude, if these have a value,
                     that row will not be returned.
                     Optional, defaults to excluding none.
@@ -61,8 +57,17 @@ def get_rows(
 
     query = (
         select(*columns)
-        .join(PacBioProductMetrics)
-        .join(PacBioRunWellMetrics)
+        .select_from(
+            join(
+                PacBioRun,
+                PacBioProductMetrics,
+                PacBioRun.id_pac_bio_tmp == PacBioProductMetrics.id_pac_bio_tmp,
+            ).join(
+                PacBioRunWellMetrics,
+                PacBioProductMetrics.id_pac_bio_rw_metrics_tmp
+                == PacBioRunWellMetrics.id_pac_bio_rw_metrics_tmp,
+            )
+        )
         .filter(
             PacBioRun.recorded_at > start_date,
             PacBioRun.recorded_at < end_date,
@@ -70,7 +75,7 @@ def get_rows(
     )
     if exclude:
         for column in exclude:
-            query.filter(column is None)
+            query = query.filter(column is None)
     log.debug(f"Running select query {query}")
     return session.execute(query).all()
 
@@ -115,9 +120,10 @@ def backfill_rw_metrics(
         log.info(f"Backfilling id for {ids[-1]}")
     query = (
         update(PacBioRunWellMetrics)
-        .join(PacBioProductMetrics)
-        .join(PacBioRun)
         .where(
+            PacBioRunWellMetrics.id_pac_bio_rw_metrics_tmp
+            == PacBioProductMetrics.id_pac_bio_rw_metrics_tmp,
+            PacBioProductMetrics.id_pac_bio_tmp == PacBioRun.id_pac_bio_tmp,
             PacBioRun.pac_bio_run_name == bindparam("run_name"),
             PacBioRun.well_label == bindparam("well_label"),
         )
@@ -160,6 +166,8 @@ def backfill_product_metrics(
     ids = []
     for row in rows:
         tags = ",".join(filter(None, [row.tag1, row.tag2]))
+        if not tags:
+            tags = None
         entity = PacBioEntity(
             run_name=row.run_name, well_label=row.well_label, tags=tags
         )
@@ -175,8 +183,8 @@ def backfill_product_metrics(
         log.info(f"Backfilling id for {ids[-1]}")
     query = (
         update(PacBioProductMetrics)
-        .join(PacBioRun)
         .where(
+            PacBioProductMetrics.id_pac_bio_tmp == PacBioRun.id_pac_bio_tmp,
             PacBioRun.pac_bio_run_name == bindparam("run_name"),
             PacBioRun.well_label == bindparam("well_label"),
             PacBioRun.tag_sequence == bindparam("tag_sequence"),
