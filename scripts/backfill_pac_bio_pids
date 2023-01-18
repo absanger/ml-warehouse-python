@@ -1,0 +1,107 @@
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+#
+# Copyright © 2023 Genome Research Ltd. All rights reserved.
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# @author Michael Kubiak <mk35@sanger.ac.uk>
+
+import argparse
+import logging
+from datetime import datetime
+
+import structlog
+from ml_warehouse.backfill.pac_bio import backfill_rw_metrics, backfill_product_metrics
+from ml_warehouse.db import mlwh_session, MissingVarException
+
+parser = argparse.ArgumentParser(
+    description="A script to backfill the Pac Bio ml warehouse tables with "
+    "product ids."
+)
+
+parser.add_argument(
+    "credential_path", type=str, help="Path to database credential file"
+)
+
+parser.add_argument(
+    "--start_date",
+    type=str,
+    default=datetime(1, 1, 1),
+    help="The beginning of the time period to backfill for. "
+    "Defaults to 0001-01-01 00:00:00",
+)
+
+parser.add_argument(
+    "--end-date",
+    type=str,
+    default=datetime.now(),
+    help="The end of the time period to backfill for."
+    "Defaults to the current datetime.",
+)
+
+parser.add_argument(
+    "--backfill_rwm",
+    action="store_true",
+    help="Backfill pac_bio_run_well_metrics table",
+)
+
+parser.add_argument(
+    "--backfill_pm", action="store_true", help="Backfill pac_bio_product_metrics table"
+)
+
+parser.add_argument(
+    "--dry_run",
+    action="store_true",
+    help="Switches on verbose mode and reports what would be done without "
+    "making any changes",
+)
+
+parser.add_argument(
+    "-v", "--verbose", action="store_true", help="Enable INFO level logging"
+)
+
+parser.add_argument(
+    "-d", "--debug", action="store_true", help="Enable DEBUG level logging"
+)
+
+
+args = parser.parse_args()
+
+logging_level = logging.WARN
+if args.verbose or args.dry_run:
+    logging_level = logging.INFO
+if args.debug:
+    logging_level = logging.DEBUG
+
+logging.basicConfig(level=logging_level, encoding="utf-8")
+
+structlog.configure(logger_factory=structlog.stdlib.LoggerFactory())
+
+log = structlog.get_logger(__file__)
+
+
+def main():
+    try:
+        session = mlwh_session()
+    except MissingVarException as e:
+        log.error(e)
+        exit(1)
+
+    if args.backfill_rwm:
+        backfill_rw_metrics(
+            session,
+            args.start_date,
+            args.end_date,
+        )

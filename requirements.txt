@@ -1,4 +1,6 @@
+git+https://github.com/wtsi-npg/npg_id_generation.git@1.0.1
 cryptography==38.0.3
 pymysql==1.0.2
 sqlalchemy-utils==0.39.0
 sqlalchemy==1.4.44
+structlog==22.1.0

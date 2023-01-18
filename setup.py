@@ -28,7 +28,7 @@ setup(
     description="Python SQLAlchemy bindings to a warehouse housing data "
     "from multiple LIM systems.",
     use_scm_version=True,
-    python_requires=">=3.8",
+    python_requires=">=3.10",
     packages=find_packages("src"),
     package_dir={"": "src"},
     setup_requires=["setuptools_scm"],
@@ -37,6 +37,9 @@ setup(
         "sqlalchemy-utils",
         "cryptography",
         "pymysql",
+        "structlog",
+        "npg_id_generation",
     ],
     tests_require=["black", "pytest", "pytest-it", "pyyaml"],
+    scripts=["scripts/backfill_pac_bio_pids"],
 )
