@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright © 2023 Genome Research Ltd. All rights reserved.
+# Copyright (c) 2023 Genome Research Ltd.
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,11 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-# @author mgcam <mg8@sanger.ac.uk>
+# Author: Marina Gourtovaia <mg8@sanger.ac.uk>
 
 from ml_warehouse._decorators import add_docstring
 from sqlalchemy import CHAR, Column, Computed, DECIMAL, Date, DateTime, Enum, Float, ForeignKeyConstraint, Index, String, TIMESTAMP, Table, Text, text
-from sqlalchemy.dialects.mysql import BIGINT, CHAR, DATETIME, ENUM, INTEGER, SMALLINT, TINYINT, VARCHAR
+from sqlalchemy.dialects.mysql import BIGINT, DATETIME, ENUM, INTEGER, SMALLINT, TINYINT, VARCHAR
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
