@@ -177,7 +177,7 @@ class TestBackfillRWMetrics:
 
     @m.context("When run without dry-run")
     @m.it("Commits changes to the database")
-    def test_backfill_rw_metrics(self, mlwh_session, caplog):
+    def test_backfill_rw_metrics(self, mlwh_session):
         expected_rows = [
             ("fb76b33a8beb37f0da6da9577c67ea5d0c654121997cc195b9e83c0834d69e58",),
             ("66c508d6dfd78c1ab82e26d26061fe141e5d33ac3b9cada6d6fe951e22ec2432",),
@@ -214,6 +214,7 @@ class TestBackfillProductMetrics:
         expected_rows = [
             (None,),
             (None,),
+            ("aaf4033829f93bb9560fb0a57dff19900bf896d685b07ef7afde5e74115193d0",),
         ]
         backfill_product_metrics(
             mlwh_session,
@@ -236,10 +237,11 @@ class TestBackfillProductMetrics:
 
     @m.context("When run without dry-run")
     @m.it("Commits changes to the database")
-    def test_backfill_product_metrics(self, mlwh_session, caplog):
+    def test_backfill_product_metrics(self, mlwh_session):
         expected_rows = [
             ("f339abe4ff45c10c3bce6e6fa6bdd242dd432fd3ce57a068de4655edbdf053aa",),
             ("4f5d77a89eb07b56104e940ff3aca80d4cf7b869af4a8d9a3f2515942dda6077",),
+            ("aaf4033829f93bb9560fb0a57dff19900bf896d685b07ef7afde5e74115193d0",),
         ]
         backfill_product_metrics(
             mlwh_session,

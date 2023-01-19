@@ -130,7 +130,7 @@ def backfill_rw_metrics(
         .values(id_pac_bio_product=bindparam("pid"))
         .execution_options(synchronize_session=False)
     )
-    log.debug(f"Running update query {query}")
+    log.debug(f"Running update query {query} with values {ids}")
     if not dry_run:
         session.execute(query, ids)
         session.commit()
@@ -195,7 +195,7 @@ def backfill_product_metrics(
         .values(id_pac_bio_product=bindparam("pid"))
         .execution_options(synchronize_session=False)
     )
-    log.debug(f"Running update query {query}")
+    log.debug(f"Running update query {query} with values {ids}")
     if not dry_run:
         session.execute(query, ids)
         session.commit()
