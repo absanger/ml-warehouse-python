@@ -113,8 +113,8 @@ def backfill_rw_metrics(
         ids.append(
             {
                 "run_name": row.run_name,
-                "well_label": row.well_label,
-                "product_id": entity.hash_product_id(),
+                "well": row.well_label,
+                "pid": entity.hash_product_id(),
             }
         )
         log.info(f"Backfilling id for {ids[-1]}")
@@ -125,13 +125,15 @@ def backfill_rw_metrics(
             == PacBioProductMetrics.id_pac_bio_rw_metrics_tmp,
             PacBioProductMetrics.id_pac_bio_tmp == PacBioRun.id_pac_bio_tmp,
             PacBioRun.pac_bio_run_name == bindparam("run_name"),
-            PacBioRun.well_label == bindparam("well_label"),
+            PacBioRun.well_label == bindparam("well"),
         )
-        .values(id_pac_bio_product=bindparam("product_id"))
+        .values(id_pac_bio_product=bindparam("pid"))
+        .execution_options(synchronize_session=False)
     )
     log.debug(f"Running update query {query}")
     if not dry_run:
         session.execute(query, ids)
+        session.commit()
 
 
 def backfill_product_metrics(
@@ -174,10 +176,10 @@ def backfill_product_metrics(
         ids.append(
             {
                 "run_name": row.run_name,
-                "well_label": row.well_label,
-                "tag_sequence": row.tag1,
-                "tag2_sequence": row.tag2,
-                "product_id": entity.hash_product_id(),
+                "well": row.well_label,
+                "tag1": row.tag1,
+                "tag2": row.tag2,
+                "pid": entity.hash_product_id(),
             }
         )
         log.info(f"Backfilling id for {ids[-1]}")
@@ -186,12 +188,14 @@ def backfill_product_metrics(
         .where(
             PacBioProductMetrics.id_pac_bio_tmp == PacBioRun.id_pac_bio_tmp,
             PacBioRun.pac_bio_run_name == bindparam("run_name"),
-            PacBioRun.well_label == bindparam("well_label"),
-            PacBioRun.tag_sequence == bindparam("tag_sequence"),
-            PacBioRun.tag2_sequence == bindparam("tag2_sequence"),
+            PacBioRun.well_label == bindparam("well"),
+            PacBioRun.tag_sequence == bindparam("tag1"),
+            PacBioRun.tag2_sequence == bindparam("tag2"),
         )
-        .values(id_pac_bio_product=bindparam("product_id"))
+        .values(id_pac_bio_product=bindparam("pid"))
+        .execution_options(synchronize_session=False)
     )
     log.debug(f"Running update query {query}")
     if not dry_run:
         session.execute(query, ids)
+        session.commit()
