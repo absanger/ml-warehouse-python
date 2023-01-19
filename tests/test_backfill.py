@@ -145,22 +145,26 @@ class TestBackfillRWMetrics:
     def test_backfill_rw_metrics_dry_run(self, mlwh_session, capsys):
         log_messages = [
             "Backfilling id for "
-            "{'run_name': '81876','well_label': 'A1', "
-            "'product_id': '5829713f0e5e1b7541786bb2bdc6fe81cae3ba11d5aa63bde22fafec4f1af9c6'}",
-            "{'run_name': '83472','well_label': 'A1', "
+            "{'run_name': '83472', 'well_label': 'A1', "
             "'product_id': '66c508d6dfd78c1ab82e26d26061fe141e5d33ac3b9cada6d6fe951e22ec2432'}",
-            "{'run_name': '81230','well_label': 'B1', "
+            "{'run_name': '81230', 'well_label': 'B1', "
             "'product_id': '6b7deecc9bc720214d50545e1cfd8466ca33b5d3c8b6b2305eafbfa0cdad88ac'}",
         ]
-        expected_rows = [{"id_pac_bio_product": None} for i in range(3)]
         backfill_rw_metrics(
             mlwh_session,
             start_date=datetime(2021, 1, 1),
             end_date=datetime(2022, 1, 1),
             dry_run=True,
         )
+        expected_rows = [
+            (None,),
+            (None,),
+            ("fb76b33a8beb37f0da6da9577c67ea5d0c654121997cc195b9e83c0834d69e58",),
+        ]
+
+        logs = capsys.readouterr().out
         for message in log_messages:
-            assert message in capsys.readouterr()
+            assert message in logs
 
         actual_rows = get_rows(
             mlwh_session,
@@ -175,7 +179,7 @@ class TestBackfillRWMetrics:
     @m.it("Commits changes to the database")
     def test_backfill_rw_metrics(self, mlwh_session, caplog):
         expected_rows = [
-            "5829713f0e5e1b7541786bb2bdc6fe81cae3ba11d5aa63bde22fafec4f1af9c6",
+            "fb76b33a8beb37f0da6da9577c67ea5d0c654121997cc195b9e83c0834d69e58",
             "66c508d6dfd78c1ab82e26d26061fe141e5d33ac3b9cada6d6fe951e22ec2432",
             "6b7deecc9bc720214d50545e1cfd8466ca33b5d3c8b6b2305eafbfa0cdad88ac",
         ]
@@ -183,7 +187,6 @@ class TestBackfillRWMetrics:
             mlwh_session,
             start_date=datetime(2021, 1, 1),
             end_date=datetime(2022, 1, 1),
-            dry_run=True,
         )
 
         actual_rows = get_rows(
@@ -203,22 +206,24 @@ class TestBackfillProductMetrics:
     def test_backfill_product_metrics_dry_run(self, mlwh_session, capsys):
         log_messages = [
             "Backfilling id for "
-            "{'run_name': '81876','well_label': 'A1', 'tag_sequence': None, 'tag2_sequence': None, "
-            "'product_id': '5829713f0e5e1b7541786bb2bdc6fe81cae3ba11d5aa63bde22fafec4f1af9c6'}",
-            "{'run_name': '83472','well_label': 'A1', 'tag_sequence': None, 'tag2_sequence': None, "
-            "'product_id': '66c508d6dfd78c1ab82e26d26061fe141e5d33ac3b9cada6d6fe951e22ec2432'}",
-            "{'run_name': '81230','well_label': 'B1', 'tag_sequence': None, 'tag2_sequence': None, "
-            "'product_id': '6b7deecc9bc720214d50545e1cfd8466ca33b5d3c8b6b2305eafbfa0cdad88ac'}",
+            "{'run_name': '83472', 'well_label': 'A1', 'tag_sequence': 'CACATATCAGAGTGCG', 'tag2_sequence': None, "
+            "'product_id': 'f339abe4ff45c10c3bce6e6fa6bdd242dd432fd3ce57a068de4655edbdf053aa'}",
+            "{'run_name': '81230', 'well_label': 'B1', 'tag_sequence': 'CACACGCGCGCTATATT', 'tag2_sequence': None, "
+            "'product_id': '4f5d77a89eb07b56104e940ff3aca80d4cf7b869af4a8d9a3f2515942dda6077'}",
         ]
-        expected_rows = [{"id_pac_bio_product": None} for i in range(3)]
+        expected_rows = [
+            (None,),
+            (None,),
+        ]
         backfill_product_metrics(
             mlwh_session,
             start_date=datetime(2021, 1, 1),
             end_date=datetime(2022, 1, 1),
             dry_run=True,
         )
+        logs = capsys.readouterr().out
         for message in log_messages:
-            assert message in capsys.readouterr()
+            assert message in logs
 
         actual_rows = get_rows(
             mlwh_session,
@@ -233,15 +238,13 @@ class TestBackfillProductMetrics:
     @m.it("Commits changes to the database")
     def test_backfill_product_metrics(self, mlwh_session, caplog):
         expected_rows = [
-            "5829713f0e5e1b7541786bb2bdc6fe81cae3ba11d5aa63bde22fafec4f1af9c6",
-            "66c508d6dfd78c1ab82e26d26061fe141e5d33ac3b9cada6d6fe951e22ec2432",
-            "6b7deecc9bc720214d50545e1cfd8466ca33b5d3c8b6b2305eafbfa0cdad88ac",
+            "f339abe4ff45c10c3bce6e6fa6bdd242dd432fd3ce57a068de4655edbdf053aa",
+            "4f5d77a89eb07b56104e940ff3aca80d4cf7b869af4a8d9a3f2515942dda6077",
         ]
         backfill_product_metrics(
             mlwh_session,
             start_date=datetime(2021, 1, 1),
             end_date=datetime(2022, 1, 1),
-            dry_run=True,
         )
 
         actual_rows = get_rows(

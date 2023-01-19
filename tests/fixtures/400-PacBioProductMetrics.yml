@@ -1,7 +1,7 @@
 - id_pac_bio_pr_metrics_tmp: 96
   id_pac_bio_rw_metrics_tmp: 89
   id_pac_bio_tmp: 20992
-  id_pac_bio_product: f339abe4ff45c10c3bce6e6fa6bdd242dd432fd3ce57a068de4655edbdf053aa
+  id_pac_bio_product: null
 - id_pac_bio_pr_metrics_tmp: 97
   id_pac_bio_rw_metrics_tmp: 89
   id_pac_bio_tmp: 20993
@@ -57,7 +57,7 @@
 - id_pac_bio_pr_metrics_tmp: 612
   id_pac_bio_rw_metrics_tmp: 434
   id_pac_bio_tmp: 20300
-  id_pac_bio_product: 4f5d77a89eb07b56104e940ff3aca80d4cf7b869af4a8d9a3f2515942dda6077
+  id_pac_bio_product: null
 - id_pac_bio_pr_metrics_tmp: 613
   id_pac_bio_rw_metrics_tmp: 435
   id_pac_bio_tmp: 20301

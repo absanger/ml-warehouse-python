@@ -75,7 +75,7 @@ def get_rows(
     )
     if exclude:
         for column in exclude:
-            query = query.filter(column is None)
+            query = query.filter(column == None)
     log.debug(f"Running select query {query}")
     return session.execute(query).all()
 
