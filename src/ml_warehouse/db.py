@@ -20,10 +20,10 @@
 import os
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 
 
-def mlwh_session() -> Session:
+def mlwh_session() -> sessionmaker:
     """Provide a connection to ml warehouse.
 
     Returns: sqlalchemy Session
@@ -44,11 +44,9 @@ def mlwh_session() -> Session:
 
     url = f"mysql+pymysql://{user}:{password}@{host}:{port}/{db}?charset=utf8mb4"
     engine = create_engine(url, future=True)
-    session = Session(engine)
+    session_maker = sessionmaker(engine)
 
-    yield session
-
-    session.close()
+    return session_maker
 
 
 class MissingVarException(Exception):
