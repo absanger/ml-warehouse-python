@@ -20,6 +20,7 @@
 from datetime import datetime
 
 from pytest import mark as m
+import pytest
 
 from ml_warehouse.backfill.pac_bio import (
     get_rows,
@@ -27,6 +28,11 @@ from ml_warehouse.backfill.pac_bio import (
     backfill_rw_metrics,
 )
 from ml_warehouse.schema import PacBioRun, PacBioRunWellMetrics, PacBioProductMetrics
+
+try:
+    import npg_id_generation
+except ImportError:
+    pytest.skip()
 
 
 @m.describe("Getting run information from tables")
@@ -41,14 +47,13 @@ class TestGetRows:
             ),
         ]
 
-        assert (
-            get_rows(
-                session=mlwh_session,
-                start_date=datetime(2021, 4, 1),
-                end_date=datetime(2021, 4, 10),
-            )
-            == expected_rows
+        actual_rows = get_rows(
+            session=mlwh_session,
+            start_date=datetime(2021, 4, 1),
+            end_date=datetime(2021, 4, 10),
         )
+        assert sort_rows(expected_rows) == sort_rows(actual_rows)
+
         assert (
             get_rows(
                 session=mlwh_session,
@@ -119,7 +124,7 @@ class TestGetRows:
             ],
             exclude=[PacBioRun.tag_sequence],
         )
-        assert [row in actual_rows for row in expected_rows]
+        assert sort_rows(expected_rows) == sort_rows(actual_rows)
 
         assert (
             get_rows(

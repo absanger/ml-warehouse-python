@@ -38,8 +38,8 @@ setup(
         "cryptography",
         "pymysql",
         "structlog",
-        "npg_id_generation",
     ],
     tests_require=["black", "pytest", "pytest-it", "pyyaml"],
+    extras_require={"backfill": "npg_id_generation"},
     scripts=["scripts/backfill_pac_bio_pids"],
 )
