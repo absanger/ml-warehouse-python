@@ -93,7 +93,7 @@ class TestGetRows:
                 PacBioRun.tag2_sequence,
             ],
         )
-        assert [row in actual_rows for row in expected_rows]
+        assert sort_rows(expected_rows) == sort_rows(actual_rows)
 
     @m.context("When provided with columns to exclude")
     @m.it("Returns only rows where those columns are null")
@@ -172,8 +172,7 @@ class TestBackfillRWMetrics:
             end_date=datetime(2022, 1, 1),
             columns=[PacBioRunWellMetrics.id_pac_bio_product],
         )
-        for row in expected_rows:
-            assert row in actual_rows
+        assert sort_rows(expected_rows) == sort_rows(actual_rows)
 
     @m.context("When run without dry-run")
     @m.it("Commits changes to the database")
@@ -195,8 +194,7 @@ class TestBackfillRWMetrics:
             end_date=datetime(2022, 1, 1),
             columns=[PacBioRunWellMetrics.id_pac_bio_product],
         )
-        for row in expected_rows:
-            assert row in actual_rows
+        assert sort_rows(expected_rows) == sort_rows(actual_rows)
 
 
 @m.describe("Backfilling product metrics table")
@@ -232,8 +230,7 @@ class TestBackfillProductMetrics:
             end_date=datetime(2022, 1, 1),
             columns=[PacBioProductMetrics.id_pac_bio_product],
         )
-        for row in expected_rows:
-            assert row in actual_rows
+        assert sort_rows(expected_rows) == sort_rows(actual_rows)
 
     @m.context("When run without dry-run")
     @m.it("Commits changes to the database")
@@ -255,5 +252,8 @@ class TestBackfillProductMetrics:
             end_date=datetime(2022, 1, 1),
             columns=[PacBioProductMetrics.id_pac_bio_product],
         )
-        for row in expected_rows:
-            assert row in actual_rows
+        assert sort_rows(expected_rows) == sort_rows(actual_rows)
+
+
+def sort_rows(rows):
+    return sorted(rows, key=lambda row: ("0",) if row == (None,) else row)
