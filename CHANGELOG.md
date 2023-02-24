@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 ### Changed
+ - Bindings for existing tables:
+  - pac_bio_run_well_metrics
+  - pac_bio_product_metrics
 
 ## [1.2.0]
 
