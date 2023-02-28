@@ -472,7 +472,7 @@ class PacBioRunWellMetrics(Base):
     pac_bio_run_name = Column(mysqlVARCHAR(255, charset='utf8', collation='utf8_unicode_ci'), nullable=False, comment='Lims specific identifier for the pacbio run')
     well_label = Column(mysqlVARCHAR(255, charset='utf8', collation='utf8_unicode_ci'), nullable=False, comment='The well identifier for the plate, A1-H12')
     instrument_type = Column(mysqlVARCHAR(32, charset='utf8', collation='utf8_unicode_ci'), nullable=False, comment='The instrument type e.g. Sequel')
-    id_pac_bio_product = Column(CHAR(64), unique=True, comment='Product id')
+    id_pac_bio_product = Column(mysqlCHAR(64, charset='utf8', collation='utf8_unicode_ci'), nullable=False, unique=True, comment='Product id')
     qc_seq_state = Column(String(255), comment='Current sequencing QC state')
     qc_seq_state_is_final = Column(mysqlTINYINT(1), comment='A flag marking the sequencing QC state as final (1) or not final (0)')
     qc_seq_date = Column(DateTime, index=True, comment='The date the current sequencing QC state was assigned')
@@ -1195,7 +1195,7 @@ class PacBioProductMetrics(Base):
     id_pac_bio_pr_metrics_tmp = Column(mysqlINTEGER(11), primary_key=True)
     id_pac_bio_rw_metrics_tmp = Column(ForeignKey('pac_bio_run_well_metrics.id_pac_bio_rw_metrics_tmp', ondelete='CASCADE'), nullable=False, index=True, comment='PacBio run well metrics id, see "pac_bio_run_well_metrics.id_pac_bio_rw_metrics_tmp"')
     id_pac_bio_tmp = Column(ForeignKey('pac_bio_run.id_pac_bio_tmp', ondelete='SET NULL'), comment='PacBio run id, see "pac_bio_run.id_pac_bio_tmp"')
-    id_pac_bio_product = Column(CHAR(64), unique=True, comment='Product id')
+    id_pac_bio_product = Column(mysqlCHAR(64, charset='utf8', collation='utf8_unicode_ci'), nullable=False, unique=True, comment='Product id')
     qc = Column(mysqlTINYINT(1), index=True, comment='The final QC outcome of the product as 0(failed), 1(passed) or NULL')
 
     pac_bio_run_well_metrics = relationship('PacBioRunWellMetrics', back_populates='pac_bio_product_metrics')
